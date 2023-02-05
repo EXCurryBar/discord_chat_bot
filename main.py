@@ -107,7 +107,7 @@ class AI:
 
 
 class discord_bot(Client):
-    def __init__(self, keys):
+    def __init__(self, keys:dict):
         """
         initialize the code with give api keys
 
