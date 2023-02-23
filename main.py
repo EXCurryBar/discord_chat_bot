@@ -33,7 +33,8 @@ class AI:
             question (string): the question you ask the bot
             answer (string): the answer replied by openai's api
         """
-        if self.history.count("Q:") > self.memory_threshold:
+        # if self.history.count("Q:") > self.memory_threshold:
+        if len(self.history) > 3000:
             self.history = self.history[self.history[2:].index("Q") + 1 :]
         self.history += f"\nQ:{question}\nA:{answer}\n"
 
@@ -47,17 +48,21 @@ class AI:
         Returns:
             answer (string): answer responed by openai's api 
         """
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=f"{self.prefix}{self.history}Q:{question}\nA:",
-            temperature=0.9,
-            max_tokens=1024,
-            top_p=1,
-            frequency_penalty=0.0,
-            presence_penalty=0.6,
-        )
-        answer = response["choices"][0]["text"].strip(" \n")
-        self.__update_prompt(question, answer)
+        try:
+            response = openai.Completion.create(
+                model="text-davinci-003",
+                prompt=f"{self.prefix}{self.history}Q:{question}\nA:",
+                temperature=0.9,
+                max_tokens=512,
+                top_p=1,
+                frequency_penalty=0.0,
+                presence_penalty=0.6,
+            )
+            answer = response["choices"][0]["text"].strip(" \n")
+            self.__update_prompt(question, answer)
+        except Exception as e:
+            # Except encounter some api error
+            return str(e)
         return answer
 
     def get_history(self, content=None):
