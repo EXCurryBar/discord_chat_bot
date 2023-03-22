@@ -1,4 +1,4 @@
-from main import AI
+from AI import AI
 import json
 
 def main():
