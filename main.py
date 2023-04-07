@@ -11,9 +11,10 @@ client =  discord.Client(intents=intents)
 ai = AI(token["openai"])
 
 functions = {
-    "generate": ai.generate_response,
     "clear" : ai.clear_history,
-    "reset" : ai.reset_prefix
+    "reset" : ai.reset_prefix,
+    "update": ai.update_prefix,
+    "history":ai.get_history
 }
 
 
@@ -25,12 +26,15 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
-        return
-    
+   
     if message.content.startswith("/ai"):
         msg = message.content.strip("/ai ")
-        response = ai.generate_response(msg)
+        command = msg.split(' ')[0]
+        try:
+            response = functions[command](msg.strip(command))
+        except:
+            response = ai.generate_response(msg)
+            
         await message.channel.send(response)
 
 client.run(token["discord"])

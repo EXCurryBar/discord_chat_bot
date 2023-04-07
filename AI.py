@@ -32,11 +32,12 @@ class AI:
     def generate_response(self, question: str):
         try:
             self.history.append({"role": "user", "content": question})
-            if self.memory_use>=3000:
+            if len(self.history) > 16:
                 self.history.pop(1)
             response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=self.history)
             self.memory_use+=response["usage"]["total_tokens"]
-            self.history.append(res:=response["choices"][0]["message"])
+            res = response["choices"][0]["message"]
+            self.history.append(res)
             return res["content"]
         except Exception as e:
             # Except encounter some api error
@@ -44,8 +45,17 @@ class AI:
 
 
     def get_history(self, content=None):
-        # TODO this
-        pass
+        output = str()
+        for item in self.history:
+            if item["role"] == "assistant":
+                output+="A: "
+            elif item["role"] == "user":
+                output+="Q: "
+            else:
+                continue
+            output+= item["content"]+"\n"
+
+        return output
     
     
     def get_token(self, content=None):
@@ -57,14 +67,16 @@ class AI:
             {"role": "system", "content": content},
         ]
 
-        pass
+        return f"prefix change to {self.history[0]['content']}"
+
 
     def clear_history(self, content=None):
-        self.history = self.history[0]
-        pass
+        self.history = [self.history[0]]
+        return "history cleared"
+
 
     def reset_prefix(self, content=None):
         self.history = [
             {"role": "system", "content": INIT_PREFIX},
         ]
-        pass
+        return "prefix reset to default"
